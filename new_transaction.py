@@ -103,19 +103,45 @@ def transaction():
     sender = st.text_input("Sender Account", key="sender")
     receiver = st.text_input("Receiver Account", key="receiver")
     amount = st.text_input("Enter Amount", key="trans_amount")
+
     if st.button("Pay"):
         try:
-            cur.execute("CALL transaction_py(%s,%s,%s)", (sender, receiver, amount))
+            amount = int(amount)  # Convert amount to integer
 
-            while cur.nextset():
-                pass  
+            # Start a transaction
+            cur.execute("START TRANSACTION")
 
-            conn.commit()
+            # Fetch sender's balance
+            cur.execute("SELECT balance FROM transaction WHERE account_number = %s", (sender,))
+            result = cur.fetchone()
+
+            if not result:
+                st.error("Sender account not found.")
+                cur.execute("ROLLBACK")
+                return
+
+            sender_balance = result[0]
+
+            # Check for sufficient balance
+            if amount > sender_balance:
+                st.error("Insufficient balance.")
+                cur.execute("ROLLBACK")
+                return
+
+            # Deduct amount from sender
+            cur.execute("UPDATE transaction SET balance = balance - %s WHERE account_number = %s", (amount, sender))
+
+            # Add amount to receiver
+            cur.execute("UPDATE transaction SET balance = balance + %s WHERE account_number = %s", (amount, receiver))
+
+            # Commit transaction
+            cur.execute("COMMIT")
             st.success("Payment Successful!")
+
+        except ValueError:
+            st.error("Invalid amount. Please enter a numeric value.")
         except Exception as e:
-            while cur.nextset():
-                pass  
-            conn.rollback()
+            cur.execute("ROLLBACK")
             st.error(f"Transaction failed: {e}")
 
 if choice == "Transaction":
