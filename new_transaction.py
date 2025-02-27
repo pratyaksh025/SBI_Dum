@@ -78,7 +78,7 @@ if choice == "Balance":
 
             if result:
                 name = result[1]
-                bal = result[3]
+                bal = result[5]
             else:
                 name = "Unknown"
                 bal = "N/A"
