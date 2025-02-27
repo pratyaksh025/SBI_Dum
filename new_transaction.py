@@ -175,3 +175,64 @@ if choice == "Create User":
     create_user()
 else:
     st.session_state["show_create_user"] = False
+    if choice == "-select-":
+        st.markdown(
+            """
+            <style>
+                .centered-text {
+                    text-align: center;
+                    color: #1a73e8;
+                    font-size: 50px;
+                    font-weight: bold;
+                    animation: fadeIn 2s ease-in-out;
+                }
+                @keyframes fadeIn {
+                    0% { opacity: 0; }
+                    100% { opacity: 1; }
+                }
+                .sub-text {
+                    text-align: center;
+                    color: #1a73e8;
+                    font-size: 20px;
+                    font-weight: bold;
+                    animation: slideIn 2s ease-in-out;
+                }
+                @keyframes slideIn {
+                    0% { transform: translateY(20px); opacity: 0; }
+                    100% { transform: translateY(0); opacity: 1; }
+                }
+            </style>
+            <h1 class="centered-text">Welcome to SBI</h1>
+            <p class="sub-text">Your trusted banking partner</p>
+            """,
+            unsafe_allow_html=True
+        )
+        st.image("sbi.png", width=700)
+        st.markdown(
+            """
+            <style>
+                .button-container {
+                    display: flex;
+                    justify-content: center;
+                    margin-top: 20px;
+                }
+                .custom-button {
+                    background-color: #1a73e8;
+                    color: white;
+                    padding: 10px 20px;
+                    font-size: 20px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+                }
+                .custom-button:hover {
+                    background-color: #0c5bbf;
+                }
+            </style>
+            <div class="button-container">
+                <button class="custom-button" onclick="window.location.href='/C:/Users/PC-6/Desktop/bank/new_transaction.py'">Get Started</button>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
