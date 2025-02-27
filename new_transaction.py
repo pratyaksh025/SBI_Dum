@@ -4,13 +4,6 @@ import random as rd
 from datetime import date
 import re
 import time
-https://www.linkedin.com/posts/sanjeevsharma59_the-dark-side-of-social-media-a-costly-mistake-activity-7292437996849479680-rpMt?utm_source=social_share_send&utm_medium=android_app&rcm=ACoAAC_8Kq0BEOHOnF72M3r1yIJ5zpgMtJfhCWU&utm_campaign=whatsapp
-Hi
-Please send today's pic
-Thank you 👍
-updated
-All 15 were present but 3 took half day leave
-pics please
 hide_menu = """
 <style>
 #MainMenu {visibility: hidden;}
