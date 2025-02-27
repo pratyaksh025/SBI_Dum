@@ -4,6 +4,7 @@ import random as rd
 from datetime import date
 import re
 import time
+
 hide_menu = """
 <style>
 #MainMenu {visibility: hidden;}
@@ -24,7 +25,6 @@ if "show_create_user" not in st.session_state:
 
 def create_user():
     st.title("Registration Form")
-    st.image('sbi.png')
 
     account_num = rd.randint(100000, 999999)
     entered_name = st.text_input("Name: ", key="name_input")
@@ -73,7 +73,6 @@ def create_user():
             st.error(f"An error occurred: {e}")
 
 if choice == "Balance":
-    st.image('sbi.png')
     s_acc = st.text_input("Enter Account Number:", key="s_acc")
     if s_acc:
         try:
@@ -169,7 +168,6 @@ if choice == "-select-":
         """,
         unsafe_allow_html=True
     )
-    st.image("sbi.png", width=700)
 
 if choice == "Create User":
     create_user()
@@ -207,7 +205,6 @@ else:
             """,
             unsafe_allow_html=True
         )
-        st.image("sbi.png", width=700)
         st.markdown(
             """
             <style>
@@ -231,7 +228,7 @@ else:
                 }
             </style>
             <div class="button-container">
-                <button class="custom-button" onclick="window.location.href='/C:/Users/PC-6/Desktop/bank/new_transaction.py'">Get Started</button>
+                <button class="custom-button" onclick="window.location.href='/C:/Users/PC-6/Desktop/bank/new_transaction.py?choice=Create%20User'">Get Started</button>
             </div>
             """,
             unsafe_allow_html=True
