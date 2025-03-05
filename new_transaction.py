@@ -156,24 +156,28 @@ def create_user():
 
 def transaction():
     st.title("Transaction")
-    sender = st.text_input("Sender Account")
+    conn= mycon()
+    cur = conn.cursor(buffered=True)
+    cur.execute("SELECT account_no,amount FROM full_client WHERE client_name = %s", (st.session_state["username"],))
+    sender= cur.fetchone()[0]
+    # sender_balance = cur.fetchone()[1]
     receiver = st.text_input("Receiver Account")
-    amount = st.text_input("Enter Amount")
+    transaction_amount = st.text_input("Enter transaction_amount")
     
     if st.button("Pay"):
         try:
             conn, cur = connect_db()
-            cur.execute("SELECT balance FROM transaction WHERE account_number = %s", (sender,))
+            cur.execute("SELECT amount FROM full_client WHERE account_no = %s", (sender,))
             sender_balance = cur.fetchone()
             
-            if not sender_balance or int(amount) > sender_balance[0]:
+            if not sender_balance or int(transaction_amount) > sender_balance[0]:
                 st.error("Insufficient funds or invalid account.")
                 return
             
-            cur.execute("UPDATE transaction SET balance = balance - %s WHERE account_number = %s", (amount, sender))
-            cur.execute("UPDATE transaction SET balance = balance + %s WHERE account_number = %s", (amount, receiver))
+            cur.execute("UPDATE full_client SET amount = amount - %s WHERE account_no = %s", (transaction_amount, sender))
+            cur.execute("UPDATE full_client SET amount = amount + %s WHERE account_no = %s", (transaction_amount, receiver))
             conn.commit()
-            st.success("Transaction Successful!")
+            st.success(f"Transaction Successful! of ₹{transaction_amount}")
         except:
             conn.rollback()
             st.error("Transaction Failed!")
