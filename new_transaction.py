@@ -27,7 +27,7 @@ def login_page():
     
     if st.button("Login"):
         conn, cur = connect_db()
-        cur.execute("SELECT pass FROM user WHERE username = %s", (user,))
+        cur.execute("SELECT pass FROM full_client WHERE client_name = %s", (user,))
         result = cur.fetchone()
 
         if result is None:
