@@ -39,8 +39,7 @@ def login_page():
             stored_pass = result[0]
             if b.checkpw(pasw.encode(), stored_pass):
                 st.success("Login Successful!")
-                is_admin = user == "admin"
-                st.session_state.update({"logged_in": True, "username": user, "is_admin": is_admin, "menu_selection": "Home-page"})
+                st.session_state.update({"logged_in": True, "username": user, "is_admin": user == "admin", "menu_selection": "Home-page"})
                 time.sleep(1)
                 st.rerun()
             else:
@@ -67,8 +66,7 @@ def balance_check():
         conn, cur = connect_db()
         cur.execute("CALL new_select(%s)", (s_acc,))
         result = cur.fetchone()
-        print(result)
-
+        
         if result:
             st.success(f"Dear {result[1]}, Your Account Balance is ₹{result[5]}")
         else:
@@ -101,69 +99,11 @@ def transaction():
             conn.rollback()
             st.error("Transaction Failed!")
 
-def create_user():
-    st.title("Registration Form")
-    st.image("reg.png", width=250)
-
-    account_num = rd.randint(100000, 999999)
-    entered_name = st.text_input("Name:", key="name_input")
-    contact_number = st.text_input("Primary Mobile:", key="mobile_input")
-    address = st.text_input("Address:", key="address_input")
-    email = st.text_input("Email:", key="email_input")
-    password = st.text_input("Password:", type="password", key="password_input")
-    amount = st.text_input("Provide your opening amount:", key="amount_input")
-    selected_date = st.date_input("Select a Date", value=date.today(), key="date_input")
-
-    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 4])
-    
-    with col4:
-        if st.button("Create Account"):  # ✅ Keep only this button
-            if not entered_name or not contact_number or not email or not password or not amount:
-                st.error("All fields except Address are required!")
-                return
-            
-            if not re.match(email_pattern, email):
-                st.error("Invalid Email! Please enter a valid email address.")
-                return
-            
-            try:
-                amount = int(amount)
-                if amount < 0:
-                    st.error("Amount cannot be negative!")
-                    return
-            except ValueError:
-                st.error("Please enter a valid numeric amount!")
-                return
-            
-            try:
-                conn= mycon()
-                cur = conn.cursor(buffered=True)
-                hashed_pw = b.hashpw(password.encode(), b.gensalt())
-                query = "CALL create_client(%s,%s,%s,%s,%s,%s,%s,%s)"
-                values = (entered_name, contact_number, address, email,  amount, selected_date, account_num, hashed_pw)
-                cur.execute(query, values)
-                conn.commit()
-                
-                while cur.nextset():
-                    pass  # Clear any remaining results
-                
-                conn.commit()
-                st.success(f"Account successfully created! Username: {entered_name}, Account Number: {account_num}. Please take a screenshot for future reference.")
-                time.sleep(10)
-                st.session_state["menu_selection"] = "login-Page"
-                st.rerun()
-            except Exception as e:
-                while cur.nextset():
-                    pass  # Clear any remaining results
-                conn.rollback()
-                st.error(f"An error occurred: {e}")
-
-
 def menu():
     is_admin = st.session_state.get("is_admin", False)
-    menu_options = ["Home-page", "Balance", "Transaction"] if not is_admin else ["Home-page", "Balance", "Transaction", "Create User"]
+    menu_options = ["Home-page", "Balance", "Transaction"]
+    if is_admin:
+        menu_options.append("Create User")
     return st.sidebar.selectbox("Menu", menu_options)
 
 def main():
@@ -176,6 +116,6 @@ def main():
         if choice == "Home-page": front_page()
         elif choice == "Balance": balance_check()
         elif choice == "Transaction": transaction()
-        elif choice == "Create User": create_user()
+        elif choice == "Create User" and st.session_state.get("is_admin", False): create_user()
 
 main()
