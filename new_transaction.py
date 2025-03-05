@@ -64,11 +64,11 @@ def balance_check():
     
     if s_acc and st.button("Check"):
         conn, cur = connect_db()
-        cur.execute("CALL new_select(%s)", (s_acc,))
+        cur.execute("SELECT account_holder_name ,balance FROM transaction WHERE account_number = %s", (s_acc,))
         result = cur.fetchone()
         
         if result:
-            st.success(f"Dear {result[1]}, Your Account Balance is ₹{result[5]}")
+            st.success(f"Dear {result[0]}, Your Account Balance is ₹{result[1]}")
         else:
             st.error("User Not Found")
             time.sleep(1)
