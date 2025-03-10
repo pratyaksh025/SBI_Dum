@@ -113,7 +113,7 @@ def create_user():
     col1, col2, col3, col4 = st.columns([1, 1, 1, 4])
     
     with col4:
-        if st.button("Create Account"):  # ✅ Keep only this button
+        if st.button("Create Account"):  
             if not entered_name or not contact_number or not email or not password or not amount:
                 st.error("All fields except Address are required!")
                 return
@@ -154,6 +154,19 @@ def create_user():
                 conn.rollback()
                 st.error(f"An error occurred: {e}")
 
+def delete_user():
+    session_state = st.session_state
+    if session_state.get("is_admin", False):
+        st.title("Delete User")
+        conn, cur = connect_db()
+        cur.execute("SELECT client_name FROM full_client")
+        users = [user[0] for user in cur.fetchall()]
+        user_to_delete = st.selectbox("Select User to Delete", users)
+        if st.button("Delete User"):
+            cur.execute("DELETE FROM full_client WHERE client_name = %s", (user_to_delete,))
+            conn.commit()
+            st.success(f"User {user_to_delete} deleted successfully!")
+
 def transaction():
     st.title("Transaction")
     conn= mycon()
@@ -182,12 +195,90 @@ def transaction():
             conn.rollback()
             st.error("Transaction Failed!")
 
+def edit_user():
+    session_state = st.session_state
+
+    if session_state.get("is_admin", False):
+        st.title("Edit User")
+        conn, cur = connect_db()
+
+    
+        cur.execute("SELECT client_name FROM full_client")
+        users = [user[0] for user in cur.fetchall()]
+
+        user_to_edit = st.selectbox("Select User to Edit", users, key="selected_user")
+        
+
+        if "edit_option" not in st.session_state:
+            st.session_state.edit_option = "select"
+        
+        st.session_state.edit_option = st.selectbox("What is to be Updated", 
+                                                    ["select", "Name", "Mobile", "Address", "Email", "Amount"], 
+                                                    index=["select", "Name", "Mobile", "Address", "Email", "Amount"].index(st.session_state.edit_option))
+
+        if st.session_state.edit_option == "Name":
+            new_name = st.text_input("Enter New Name", key="new_name")
+            if st.button("Update"):
+                cur.execute("UPDATE full_client SET client_name = %s WHERE client_name = %s", 
+                            (new_name, user_to_edit))
+                conn.commit()
+                st.success(f"User {user_to_edit} updated successfully!")
+                st.session_state.edit_option = "select"  # Reset option after update
+
+        elif st.session_state.edit_option == "Mobile":
+            new_mobile = st.text_input("Enter New Mobile", key="new_mobile")
+            if st.button("Update"):
+                cur.execute("UPDATE full_client SET mobile = %s WHERE client_name = %s", 
+                            (new_mobile, user_to_edit))
+                conn.commit()
+                st.success(f"User {user_to_edit} updated successfully!")
+                st.session_state.edit_option = "select"
+
+        elif st.session_state.edit_option == "Address":
+            new_address = st.text_input("Enter New Address", key="new_address")
+            if st.button("Update"):
+                cur.execute("UPDATE full_client SET address = %s WHERE client_name = %s", 
+                            (new_address, user_to_edit))
+                conn.commit()
+                st.success(f"User {user_to_edit} updated successfully!")
+                st.session_state.edit_option = "select"
+
+        elif st.session_state.edit_option == "Email":
+            new_email = st.text_input("Enter New Email", key="new_email")
+            if st.button("Update"):
+                email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+                if re.match(email_pattern, new_email):
+                    cur.execute("UPDATE full_client SET email = %s WHERE client_name = %s", 
+                                (new_email, user_to_edit))
+                    conn.commit()
+                else:
+                    st.error("Invalid Email! Please enter a valid email address.")
+                    return
+                
+                st.success(f"User {user_to_edit} updated successfully!")
+                st.session_state.edit_option = "select"
+
+        elif st.session_state.edit_option == "Amount":
+            new_amount = st.text_input("Enter New Amount", key="new_amount")
+            if st.button("Update"):
+                cur.execute("UPDATE full_client SET amount = %s WHERE client_name = %s", 
+                            (new_amount, user_to_edit))
+                conn.commit()
+                st.success(f"User {user_to_edit} updated successfully!")
+                st.session_state.edit_option = "select"
+
+
+            
+
 def menu():
     is_admin = st.session_state.get("is_admin", False)
     menu_options = ["Home-page", "Balance", "Transaction"]
     if is_admin:
         menu_options.append("Create User")
+        menu_options.append("delete_user")
+        menu_options.append("Edit User")
     return st.sidebar.selectbox("Menu", menu_options)
+
 
 def main():
     hide_menu()
@@ -199,6 +290,11 @@ def main():
         if choice == "Home-page": front_page()
         elif choice == "Balance": balance_check()
         elif choice == "Transaction": transaction()
-        elif choice == "Create User" and st.session_state.get("is_admin", False): create_user()
+        elif choice == "Create User" and st.session_state.get("is_admin", False): 
+            create_user()
+        elif choice=="delete_user" and st.session_state.get("is_admin", False):
+            delete_user()
+        elif choice=="Edit User" and st.session_state.get("is_admin", False):
+            edit_user()
 
 main()
